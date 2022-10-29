@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Dict, Optional
 
 from pydantic import BaseModel
@@ -14,13 +15,13 @@ class Coauthor(BaseModel):
     affiliation: str
 
 
-class Bib(BaseModel):
+class GSBib(BaseModel):
     title: str
     pub_year: Optional[str] = None
     citation: str
 
 
-class BibFull(BaseModel):
+class GSBibFilled(BaseModel):
     title: str
     author: list[str]
     pub_year: str
@@ -28,10 +29,10 @@ class BibFull(BaseModel):
     abstract: str
 
 
-class PublicationFull(BaseModel):
+class GSPublicationFilled(BaseModel):
     container_type: str
     source: str
-    bib: BibFull
+    bib: GSBibFilled
     filled: bool
     gsrank: int
     pub_url: str
@@ -44,10 +45,10 @@ class PublicationFull(BaseModel):
     eprint_url: str
 
 
-class Publication(BaseModel):
+class GSPublication(BaseModel):
     container_type: str
     source: str
-    bib: Bib
+    bib: GSBib
     filled: bool
     author_pub_id: str
     num_citations: int
@@ -81,7 +82,7 @@ class GoogleScholar(BaseModel):
     i10index5y: int
     cites_per_year: Dict[int, int]
     coauthors: list[Coauthor]
-    publications: list[Publication]
+    publications: list[GSPublication]
     public_access: PublicAccess
 
 
@@ -105,7 +106,7 @@ class Researcher(BaseModel):
             faculty=researcher.faculty.name,
             interests=[item.name for item in researcher.interests.all()[:10]],
             co_authors=[item.name for item in researcher.co_authors.all()[:10]],
-            publications=[item.name for item in researcher.publications.all()[:10]],
+            publications=[item.title for item in researcher.publications.all()[:10]],
         )
 
 
@@ -126,3 +127,32 @@ class ResearcherWebsite(BaseModel):
     @classmethod
     def from_orm(cls, researcher_site: models.ResearcherWebsites):
         return cls(url=researcher_site.website.url, type=researcher_site.type)
+
+
+class Citation(BaseModel):
+    year: date
+    count: int
+
+    @classmethod
+    def from_orm(cls, citation: models.Citation):
+        return cls(year=citation.year, count=citation.count)
+
+
+class Publication(BaseModel):
+    title: str
+    abstract: str
+    num_citations: int
+    year: Optional[date]
+    paper_url: Optional[str]
+    conference: Optional[str]
+
+    @classmethod
+    def from_orm(cls, publication: models.Publication):
+        return cls(
+            title=publication.title,
+            abstract=publication.abstract,
+            num_citations=publication.num_citations,
+            year=publication.year,
+            paper_url=publication.paper_url.url if publication.paper_url else None,
+            conference=publication.conference.name if publication.conference else None,
+        )

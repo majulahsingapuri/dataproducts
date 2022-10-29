@@ -10,16 +10,22 @@ router = Router()
 
 @router.get("/researcher", response=PaginatedList[schemas.Researcher])
 def get_researchers(request, page: int = 1, limit: int = 10):
-    results = models.Researcher.objects.all()
+    results = models.Researcher.objects.all().prefetch_related(
+        "interests", "co_authors", "publications"
+    )
     return paginate(results, schemas.Researcher, page, limit)
 
 
 @router.get("/researcher/search", response=PaginatedList[schemas.Researcher])
 def get_researcher_search(request, q: str = None, page: int = 1, limit: int = 10):
     if q:
-        results = models.Researcher.objects.fuzzy_search(q)
+        results = models.Researcher.objects.fuzzy_search(q).prefetch_related(
+            "interests", "co_authors", "publications"
+        )
         return paginate(results, schemas.Researcher, page, limit)
-    results = models.Researcher.objects.all()
+    results = models.Researcher.objects.all().prefetch_related(
+        "interests", "co_authors", "publications"
+    )
     return paginate(results, schemas.Researcher, page, limit)
 
 
@@ -38,3 +44,22 @@ def get_researcher_websites(request, name: str, page: int = 1, limit: int = 10):
         researcher=researcher
     ).prefetch_related("website")
     return paginate(results, schemas.ResearcherWebsite, page, limit)
+
+
+@router.get("/researcher/{str:name}/citations", response=list[schemas.Citation])
+def get_researcher_citations(request, name: str):
+    researcher = get_object_or_404(models.Researcher, name=name)
+    results = models.Citation.objects.filter(researcher=researcher).order_by("year")
+    return [schemas.Citation.from_orm(citation) for citation in results]
+
+
+@router.get(
+    "/researcher/{str:name}/publications", response=PaginatedList[schemas.Publication]
+)
+def get_researcher_publications(request, name: str, page: int = 1, limit: int = 10):
+    researcher = get_object_or_404(models.Researcher, name=name)
+    results = models.Publication.objects.filter(researcher=researcher).prefetch_related(
+        "paper_url", "conference"
+    )
+
+    return paginate(results, schemas.Publication, page, limit)
