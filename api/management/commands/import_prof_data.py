@@ -95,7 +95,7 @@ class Command(BaseCommand):
         prof.co_authors.add(
             *[
                 models.Researcher.objects.update_or_create(
-                    name=author.name, scholar_id=author.scholar_id
+                    name=author.name, defaults=dict(scholar_id=author.scholar_id)
                 )[0]
                 for author in data.coauthors
             ]
