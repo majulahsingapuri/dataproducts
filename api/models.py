@@ -92,7 +92,7 @@ class Researcher(models.Model):
     name = models.TextField(unique=True)
     email = models.EmailField(null=True, unique=True)
     citations = models.PositiveIntegerField(null=True)
-    scholar_id = models.TextField(unique=True)
+    scholar_id = models.TextField()
     faculty = models.ForeignKey(Faculty, on_delete=models.RESTRICT, null=True)
     interests = models.ManyToManyField(Interest)
     co_authors = models.ManyToManyField("self")

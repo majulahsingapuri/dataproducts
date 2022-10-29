@@ -32,6 +32,8 @@ class Config(BaseSettings):
     database_host: str
     database_port: int = 5432
 
+    scraper_api_key: str
+
 
 # Lazily initialize the config variable using module-level __getattr__
 # so that we can import the Config class without triggering config load.

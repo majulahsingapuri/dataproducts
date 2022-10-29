@@ -103,7 +103,26 @@ class Researcher(BaseModel):
             citations=researcher.citations,
             scholar_id=researcher.scholar_id,
             faculty=researcher.faculty.name,
-            interests=[item.name for item in researcher.interests.all()],
-            co_authors=[item.name for item in researcher.co_authors.all()],
-            publications=[item.name for item in researcher.publications.all()],
+            interests=[item.name for item in researcher.interests.all()[:10]],
+            co_authors=[item.name for item in researcher.co_authors.all()[:10]],
+            publications=[item.name for item in researcher.publications.all()[:10]],
         )
+
+
+class Website(BaseModel):
+    url: str
+
+    @classmethod
+    def from_orm(cls, website: models.Website):
+        return cls(
+            url=website.url,
+        )
+
+
+class ResearcherWebsite(BaseModel):
+    url: str
+    type: str
+
+    @classmethod
+    def from_orm(cls, researcher_site: models.ResearcherWebsites):
+        return cls(url=researcher_site.website.url, type=researcher_site.type)

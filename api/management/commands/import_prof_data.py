@@ -12,12 +12,17 @@ from scholarly import ProxyGenerator, scholarly
 from tqdm import tqdm
 
 from api import models, schemas
+from dataprod.config import Config, config
+
+config: Config
+
 
 print("Generating Proxies")
 pg = ProxyGenerator()
 try:
-    success = pg.ScraperAPI("c5aed4fee563410c13f788691b47041e")
-    scholarly.use_proxy(pg)
+    success = pg.ScraperAPI(config.scraper_api_key)
+    scholarly.use_proxy(pg, pg)
+    print("UsingProxy")
 except Exception:
     print("proxies timed out")
 
@@ -128,8 +133,10 @@ class Command(BaseCommand):
                 researcher, _ = models.Researcher.objects.update_or_create(
                     name=alt_names.get(name, name),
                     email=email,
-                    citations=citations if not isnan(citations) else None,
-                    faculty=faculty,
+                    defaults=dict(
+                        citations=citations if not isnan(citations) else None,
+                        faculty=faculty,
+                    ),
                 )
                 dr_ntu, _ = models.Website.objects.update_or_create(url=dr_ntu)
                 models.ResearcherWebsites.objects.update_or_create(
