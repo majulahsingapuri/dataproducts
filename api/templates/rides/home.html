@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h1>Welcome, {{ request.user.first }}!</h1>
+<form action="/accounts/logout/" method="POST">
+    {% csrf_token %}
+    <button type="submit">logout</button>
+</form>
+</body>
+</html>
