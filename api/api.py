@@ -16,17 +16,12 @@ def get_researchers(request, page: int = 1, limit: int = 10):
     return paginate(results, schemas.Researcher, page, limit)
 
 
-@router.get("/researcher/search", response=PaginatedList[schemas.Researcher])
+@router.get("/researcher/search", response=PaginatedList[schemas.ResearcherStub])
 def get_researcher_search(request, q: str = None, page: int = 1, limit: int = 10):
+    results = models.Researcher.objects.all()
     if q:
-        results = models.Researcher.objects.fuzzy_search(q).prefetch_related(
-            "interests", "co_authors", "publications"
-        )
-        return paginate(results, schemas.Researcher, page, limit)
-    results = models.Researcher.objects.all().prefetch_related(
-        "interests", "co_authors", "publications"
-    )
-    return paginate(results, schemas.Researcher, page, limit)
+        results = results.fuzzy_search(q)
+    return paginate(results, schemas.ResearcherStub, page, limit)
 
 
 @router.get("/researcher/{str:name}", response=schemas.Researcher)

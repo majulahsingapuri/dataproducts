@@ -103,10 +103,20 @@ class Researcher(BaseModel):
             email=researcher.email,
             citations=researcher.citations,
             scholar_id=researcher.scholar_id,
-            faculty=researcher.faculty.name,
+            faculty=researcher.faculty.name if researcher.faculty else None,
             interests=[item.name for item in researcher.interests.all()[:10]],
             co_authors=[item.name for item in researcher.co_authors.all()[:10]],
             publications=[item.title for item in researcher.publications.all()[:10]],
+        )
+
+
+class ResearcherStub(BaseModel):
+    name: str
+
+    @classmethod
+    def from_orm(cls, researcher: models.Researcher):
+        return cls(
+            name=researcher.name,
         )
 
 
