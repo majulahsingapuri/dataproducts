@@ -70,6 +70,7 @@ class Publication(models.Model):
     abstract = models.TextField()
     num_citations = models.PositiveIntegerField()
     year = models.DateField(null=True)
+    group = models.PositiveIntegerField(null=True)
     paper_url = models.ForeignKey(Website, on_delete=models.PROTECT, null=True)
     conference = models.ForeignKey(Conference, on_delete=models.SET_NULL, null=True)
 
