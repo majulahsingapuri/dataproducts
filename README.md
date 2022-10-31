@@ -55,22 +55,16 @@
    pytest --cov
    ```
 
-8. Create a local superuser.
-
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-9. Start the development server. This will listen on localhost:8000
+8. Start the development server. This will listen on localhost:8000
 
    ```bash
    python manage.py runserver
    ```
 
-10. Start the frontend server (refer to [dataprod-app](https://github.com/dataprod/dataprod-app)). This will listen on
+9. Start the frontend server (refer to [dataprod-app](https://github.com/majulahsingapuri/dataprod-app)). This will listen on
     localhost:3000
 
-11. Start Caddy in a new terminal to reverse-proxy both the backend and frontend through the same origin to avoid
+10. Start Caddy in a new terminal to reverse-proxy both the backend and frontend through the same origin to avoid
     session authentication and CORS issues. The application will be accessible at `http://localhost:8080`
 
       ```bash
