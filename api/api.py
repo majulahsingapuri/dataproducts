@@ -58,3 +58,22 @@ def get_researcher_publications(request, name: str, page: int = 1, limit: int = 
     )
 
     return paginate(results, schemas.Publication, page, limit)
+
+
+@router.get("/scse/graph", response=schemas.Graph)
+def get_scse_graph(request):
+    interests = models.Interest.objects.all()
+    scse = models.Faculty.objects.first()
+    profs = models.Researcher.objects.filter(
+        interests__in=interests, faculty=scse
+    ).distinct()
+
+    nodes = [schemas.InterestNode.from_orm(interest) for interest in interests] + [
+        schemas.ProfNode.from_orm(prof) for prof in profs
+    ]
+    links = [
+        schemas.Link(source=prof.name, target=interest.name)
+        for prof in profs
+        for interest in prof.interests.all()
+    ]
+    return schemas.Graph(nodes=nodes, links=links)

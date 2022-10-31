@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, Optional
+from typing import Dict, Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -166,3 +166,36 @@ class Publication(BaseModel):
             paper_url=publication.paper_url.url if publication.paper_url else None,
             conference=publication.conference.name if publication.conference else None,
         )
+
+
+class InterestNode(BaseModel):
+    id: str
+    name: str
+    type: Literal["interest"]
+
+    @classmethod
+    def from_orm(cls, interest: models.Interest):
+        return cls(id=interest.name, name=interest.name, type="interest")
+
+
+class ProfNode(BaseModel):
+    id: str
+    name: str
+    data: Researcher
+    type: Literal["prof"]
+
+    @classmethod
+    def from_orm(cls, prof: models.Researcher):
+        return cls(
+            id=prof.name, name=prof.name, data=Researcher.from_orm(prof), type="prof"
+        )
+
+
+class Link(BaseModel):
+    source: str
+    target: str
+
+
+class Graph(BaseModel):
+    nodes: list[Union[ProfNode, InterestNode]]
+    links: list[Link]

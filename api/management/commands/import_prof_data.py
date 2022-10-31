@@ -12,15 +12,11 @@ from scholarly import ProxyGenerator, scholarly
 from tqdm import tqdm
 
 from api import models, schemas
-from dataprod.config import Config, config
-
-config: Config
-
 
 print("Generating Proxies")
 pg = ProxyGenerator()
 try:
-    success = pg.ScraperAPI(config.scraper_api_key)
+    success = pg.FreeProxies()
     scholarly.use_proxy(pg, pg)
     print("UsingProxy")
 except Exception:
@@ -47,12 +43,14 @@ class Command(BaseCommand):
         prof_name = alt_names.get(prof.name, prof.name)
         print(f"Adding prof: {prof_name}")
         try:
-            data = schemas.GoogleScholar.parse_file(f"./data/{prof_name}.json")
+            data = schemas.GoogleScholar.parse_file(
+                f"./data/researchers/{prof_name}.json"
+            )
             print(f"using cached {prof_name}")
         except Exception:
             data = scholarly.fill(next(scholarly.search_author(prof_name)))
             data = schemas.GoogleScholar.parse_obj(data)
-            with open(f"./data/{prof_name}.json", "w+") as f:
+            with open(f"./data/researchers/{prof_name}.json", "w+") as f:
                 f.write(data.json())
         results = search(prof_name, num_results=10)
 

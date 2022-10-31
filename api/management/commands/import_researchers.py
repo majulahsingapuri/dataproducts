@@ -1,5 +1,6 @@
 from datetime import datetime
 from multiprocessing.dummy import Pool
+from pathlib import Path
 
 import pandas as pd
 from django.core.management.base import BaseCommand
@@ -11,6 +12,7 @@ from api import models, schemas
 print("Generating Proxies")
 pg = ProxyGenerator()
 try:
+    pg.FreeProxies()
     scholarly.use_proxy(pg, pg)
     print("UsingProxy")
 except Exception:
@@ -18,18 +20,20 @@ except Exception:
 
 
 class Command(BaseCommand):
-    help = "Imports the Initial Professor Data"
+    help = "Imports the Additional Researchers"
 
     def get_researchers(self, researcher: models.Researcher):
         researcher_name = researcher.name
         print(f"Adding Researcher: {researcher_name}")
         try:
-            data = schemas.GoogleScholar.parse_file(f"./data/{researcher_name}.json")
+            data = schemas.GoogleScholar.parse_file(
+                f"./data/researchers/{researcher_name}.json"
+            )
             print(f"using cached {researcher_name}")
         except Exception:
             data = scholarly.fill(next(scholarly.search_author(researcher_name)))
             data = schemas.GoogleScholar.parse_obj(data)
-            with open(f"./data/{researcher_name}.json", "w+") as f:
+            with open(f"./data/researchers/{researcher_name}.json", "w+") as f:
                 f.write(data.json())
 
         researcher.citations = data.citedby
@@ -83,6 +87,14 @@ class Command(BaseCommand):
 
         print("Loading CSV")
         profs = pd.read_csv("SCSE_profs.csv")
+
+        names = [
+            path.stem
+            for path in (Path.cwd() / "data" / "researchers").glob("**/*.json")
+        ]
+
+        for name in names:
+            models.Researcher.objects.update_or_create(name=name)
 
         researchers = list(
             models.Researcher.objects.filter(~Q(name__in=list(profs.Name)))
